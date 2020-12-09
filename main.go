@@ -1,9 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"io/ioutil"
 	"os"
+	"strings"
 )
 
 func main() {
@@ -30,7 +32,13 @@ func runFile(filepath string) error {
 }
 
 func run(source string) error {
-	fmt.Println("File is", source)
+	reader := strings.NewReader(source)
+	scanner := bufio.NewScanner(reader)
+	scanner.Split(bufio.ScanRunes)
+
+	for scanner.Scan() {
+		fmt.Println(scanner.Text())
+	}
 	return nil
 }
 
