@@ -8,11 +8,19 @@ import (
 	"strings"
 )
 
+type (
+	// Lox language instance
+	Lox struct {
+		hasError bool
+	}
+)
+
 func main() {
+	lox := Lox{}
 	if len(os.Args) == 1 {
-		runPrompt()
+		lox.runPrompt()
 	} else if len(os.Args) == 2 {
-		err := runFile(os.Args[1])
+		err := lox.runFile(os.Args[1])
 		if err != nil {
 			fmt.Println("Error:", err)
 			os.Exit(65)
@@ -23,15 +31,15 @@ func main() {
 	}
 }
 
-func runFile(filepath string) error {
+func (lox *Lox) runFile(filepath string) error {
 	bytes, err := ioutil.ReadFile(filepath)
 	if err != nil {
 		return err
 	}
-	return run(string(bytes))
+	return lox.run(string(bytes))
 }
 
-func run(source string) error {
+func (lox *Lox) run(source string) error {
 	reader := strings.NewReader(source)
 	scanner := bufio.NewScanner(reader)
 	scanner.Split(bufio.ScanRunes)
@@ -42,7 +50,7 @@ func run(source string) error {
 	return nil
 }
 
-func runPrompt() {
+func (lox *Lox) runPrompt() {
 	for {
 		var line string
 		fmt.Print("> ")
@@ -50,9 +58,18 @@ func runPrompt() {
 		if len(line) == 0 {
 			break
 		}
-		err := runFile(line)
+		err := lox.runFile(line)
 		if err != nil {
 			fmt.Printf("Error: %s\n", err)
 		}
 	}
+}
+
+func (lox *Lox) exception(line int, message string) {
+	lox.report(line, "", message)
+}
+
+func (lox *Lox) report(line int, where, message string) {
+	fmt.Fprintf(os.Stderr, "[line %d] Error %s: %s", line, where, message)
+	lox.hasError = true
 }
