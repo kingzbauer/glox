@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -14,6 +15,9 @@ type (
 		hasError bool
 	}
 )
+
+// ErrScanning returned when an error has been encountered while scanning the source code
+var ErrScanning = errors.New("Error encountered while scanning")
 
 func main() {
 	lox := Lox{}
@@ -36,7 +40,14 @@ func (lox *Lox) runFile(filepath string) error {
 	if err != nil {
 		return err
 	}
-	return lox.run(string(bytes))
+	err = lox.run(string(bytes))
+	if err != nil {
+		return err
+	}
+	if lox.hasError {
+		return ErrScanning
+	}
+	return nil
 }
 
 func (lox *Lox) run(source string) error {
@@ -61,6 +72,7 @@ func (lox *Lox) runPrompt() {
 		err := lox.runFile(line)
 		if err != nil {
 			fmt.Printf("Error: %s\n", err)
+			lox.hasError = false
 		}
 	}
 }
