@@ -197,7 +197,7 @@ func (s *Scanner) peekNext() byte {
 func (s *Scanner) isAlpha(char byte) bool {
 	return (char >= 'a' && char <= 'z') ||
 		(char >= 'A' && char <= 'Z') ||
-		c == '_'
+		char == '_'
 }
 
 func (s *Scanner) isAlphaNumeric(char byte) bool {
@@ -205,7 +205,7 @@ func (s *Scanner) isAlphaNumeric(char byte) bool {
 }
 
 func (s *Scanner) identifier() {
-	for s.isAlphaNumeric(peek()) {
+	for s.isAlphaNumeric(s.peek()) {
 		s.advance()
 	}
 
@@ -215,5 +215,5 @@ func (s *Scanner) identifier() {
 		typ = Identifier
 	}
 
-	s.addToken(Identifier, nil)
+	s.addToken(typ, nil)
 }

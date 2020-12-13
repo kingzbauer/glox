@@ -52,7 +52,10 @@ func (lox *Lox) run(source string) error {
 	scanner := NewScanner(source, lox)
 	tokens := scanner.ScanTokens()
 
-	fmt.Println("Tokens: %s", tokens)
+	fmt.Printf("Type\tLexeme\tLiteral\n")
+	for _, token := range tokens {
+		fmt.Printf("%s\t%s\t%s\n", token.Type, token.Lexeme, token.Literal)
+	}
 	return nil
 }
 
