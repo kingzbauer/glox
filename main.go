@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"errors"
 	"fmt"
 	"io/ioutil"
 	"os"
-	"strings"
 )
 
 type (
@@ -51,13 +49,10 @@ func (lox *Lox) runFile(filepath string) error {
 }
 
 func (lox *Lox) run(source string) error {
-	reader := strings.NewReader(source)
-	scanner := bufio.NewScanner(reader)
-	scanner.Split(bufio.ScanRunes)
+	scanner := NewScanner(source, lox)
+	tokens := scanner.ScanTokens()
 
-	for scanner.Scan() {
-		fmt.Println(scanner.Text())
-	}
+	fmt.Println("Tokens: %s", tokens)
 	return nil
 }
 
@@ -77,7 +72,8 @@ func (lox *Lox) runPrompt() {
 	}
 }
 
-func (lox *Lox) exception(line int, message string) {
+// Exception reports an error
+func (lox *Lox) Exception(line int, message string) {
 	lox.report(line, "", message)
 }
 

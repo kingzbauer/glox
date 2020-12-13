@@ -1,24 +1,50 @@
 package main
 
+import (
+	"strconv"
+)
+
 // Scanner type
 type Scanner struct {
 	source               string
 	tokens               []Token
 	start, current, line int
+	lox                  *Lox
 }
 
 // NewScanner instance from source
-func NewScanner(source string) *Scanner {
+func NewScanner(source string, lox *Lox) *Scanner {
 	return &Scanner{
 		source: source,
 		tokens: []Token{},
 		line:   1,
+		lox:    lox,
 	}
 }
 
 func (s *Scanner) advance() byte {
 	s.current++
 	return s.source[s.current-1]
+}
+
+func (s *Scanner) match(expected byte) bool {
+	if s.isAtEnd() {
+		return false
+	}
+
+	if s.source[s.current] != expected {
+		return false
+	}
+
+	s.current++
+	return true
+}
+
+func (s *Scanner) peek() byte {
+	if s.isAtEnd() {
+		return '\000'
+	}
+	return s.source[s.current]
 }
 
 func (s *Scanner) addToken(tokenType TokenType, literal interface{}) {
@@ -49,6 +75,55 @@ func (s *Scanner) scanToken() {
 		s.addToken(SemiColon, nil)
 	case '*':
 		s.addToken(Star, nil)
+	case '!':
+		if s.match('=') {
+			s.addToken(BangEqual, nil)
+		} else {
+			s.addToken(Bang, nil)
+		}
+	case '=':
+		if s.match('=') {
+			s.addToken(EqualEqual, nil)
+		} else {
+			s.addToken(Equal, nil)
+		}
+	case '>':
+		if s.match('=') {
+			s.addToken(GreaterEqual, nil)
+		} else {
+			s.addToken(Greater, nil)
+		}
+	case '<':
+		if s.match('=') {
+			s.addToken(LessEqual, nil)
+		} else {
+			s.addToken(Less, nil)
+		}
+	case '/':
+		if s.match('/') {
+			// A comment goes until the end of the line
+			for s.peek() != '\n' && !s.isAtEnd() {
+				s.advance()
+			}
+		} else {
+			s.addToken(Slash, nil)
+		}
+	case ' ':
+		fallthrough
+	case '\t':
+		fallthrough
+	case '\r':
+	case '\n':
+		s.line++
+	case '"':
+		s.str()
+	default:
+		if s.isDigit(c) {
+			s.number()
+		} else {
+			// handle error
+			s.lox.Exception(s.line, "Unexpected character")
+		}
 	}
 }
 
@@ -65,4 +140,54 @@ func (s *Scanner) ScanTokens() []Token {
 
 func (s *Scanner) isAtEnd() bool {
 	return s.current >= len(s.source)
+}
+
+func (s *Scanner) str() {
+	for s.peek() != '"' && !s.isAtEnd() {
+		if s.peek() == '\n' {
+			s.line++
+		}
+		s.advance()
+	}
+
+	if s.isAtEnd() {
+		s.lox.Exception(s.line, "Unterminated string.")
+	}
+
+	// The closing ".
+	s.advance()
+
+	// Trim the sorrounding quotes.
+	value := s.source[s.start+1 : s.current-1]
+	s.addToken(String, value)
+}
+
+func (s *Scanner) isDigit(val byte) bool {
+	return val >= '0' && val <= '9'
+}
+
+func (s *Scanner) number() {
+	for s.isDigit(s.peek()) {
+		s.advance()
+	}
+
+	if s.peek() == '.' && s.isDigit(s.peekNext()) {
+		// Consume the "."
+		s.advance()
+
+		for s.isDigit(s.peek()) {
+			s.advance()
+		}
+	}
+
+	// We will ignore the error. We expect the input to be valid
+	number, _ := strconv.ParseFloat(s.source[s.start:s.current], 64)
+	s.addToken(Number, number)
+}
+
+func (s *Scanner) peekNext() byte {
+	if s.current+1 >= len(s.source) {
+		return '\000'
+	}
+	return s.source[s.current+1]
 }
