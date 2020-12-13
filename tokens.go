@@ -100,3 +100,25 @@ func NewToken(tokenType TokenType, lexeme string, literal interface{}, line int)
 func (t Token) String() string {
 	return fmt.Sprintf("%d %s %s", t.Type, t.Lexeme, t.Literal)
 }
+
+var (
+	// Keywords map
+	Keywords = map[string]TokenType{
+		"and":    And,
+		"class":  Class,
+		"else":   Else,
+		"false":  False,
+		"for":    For,
+		"fun":    Fun,
+		"if":     If,
+		"nil":    Nil,
+		"or":     Or,
+		"print":  Print,
+		"return": Return,
+		"super":  Super,
+		"this":   This,
+		"true":   True,
+		"var":    Var,
+		"while":  While,
+	}
+)

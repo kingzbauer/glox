@@ -120,6 +120,8 @@ func (s *Scanner) scanToken() {
 	default:
 		if s.isDigit(c) {
 			s.number()
+		} else if s.isAlpha(c) {
+			s.identifier()
 		} else {
 			// handle error
 			s.lox.Exception(s.line, "Unexpected character")
@@ -190,4 +192,28 @@ func (s *Scanner) peekNext() byte {
 		return '\000'
 	}
 	return s.source[s.current+1]
+}
+
+func (s *Scanner) isAlpha(char byte) bool {
+	return (char >= 'a' && char <= 'z') ||
+		(char >= 'A' && char <= 'Z') ||
+		c == '_'
+}
+
+func (s *Scanner) isAlphaNumeric(char byte) bool {
+	return s.isAlpha(char) || s.isDigit(char)
+}
+
+func (s *Scanner) identifier() {
+	for s.isAlphaNumeric(peek()) {
+		s.advance()
+	}
+
+	text := s.source[s.start:s.current]
+	typ, exists := Keywords[text]
+	if !exists {
+		typ = Identifier
+	}
+
+	s.addToken(Identifier, nil)
 }
