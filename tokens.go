@@ -4,6 +4,8 @@ import (
 	"fmt"
 )
 
+//go:generate stringer -type=TokenType
+
 // TokenType defines the type of lexeme
 type TokenType int
 
