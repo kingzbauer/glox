@@ -30,8 +30,8 @@ const (
 	SemiColon
 	// Slash token type
 	Slash
-	// Start token type
-	Start
+	// Star token type
+	Star
 
 	// One or two character tokens
 
