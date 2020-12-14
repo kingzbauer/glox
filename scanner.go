@@ -105,6 +105,8 @@ func (s *Scanner) scanToken() {
 			for s.peek() != '\n' && !s.isAtEnd() {
 				s.advance()
 			}
+		} else if s.match('*') {
+			s.blockComments()
 		} else {
 			s.addToken(Slash, nil)
 		}
@@ -154,6 +156,7 @@ func (s *Scanner) str() {
 
 	if s.isAtEnd() {
 		s.lox.Exception(s.line, "Unterminated string.")
+		return
 	}
 
 	// The closing ".
@@ -214,6 +217,18 @@ func (s *Scanner) identifier() {
 	if !exists {
 		typ = Identifier
 	}
-
 	s.addToken(typ, nil)
+}
+
+func (s *Scanner) blockComments() {
+	for !s.isAtEnd() {
+		char := s.advance()
+		if char == '*' && s.match('/') {
+			return
+		}
+		if char == '\n' {
+			s.line++
+		}
+	}
+	s.lox.Exception(s.line, "Unterminated block comment")
 }
