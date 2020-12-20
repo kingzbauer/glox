@@ -18,7 +18,7 @@ type (
 var ErrScanning = errors.New("Error encountered while scanning")
 
 func main() {
-	lox := Lox{}
+	/* lox := Lox{}
 	if len(os.Args) == 1 {
 		lox.runPrompt()
 	} else if len(os.Args) == 2 {
@@ -30,7 +30,19 @@ func main() {
 	} else {
 		fmt.Println("Usage: glox [script]")
 		os.Exit(64)
+	}*/
+
+	expr := Binary{
+		Left: Unary{
+			Operator: NewToken(Minus, "-", nil, 1),
+			Right:    Literal{Value: 123},
+		},
+		Operator: NewToken(Star, "*", nil, 1),
+		Right: Grouping{
+			Expr: Literal{Value: 45.67},
+		},
 	}
+	fmt.Println(NewAstPrinter().Print(expr))
 }
 
 func (lox *Lox) runFile(filepath string) error {
