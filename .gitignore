@@ -3,3 +3,6 @@
 
 # ignore the binary
 glox
+
+# ignore lox files
+*.lox
